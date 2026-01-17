@@ -50,7 +50,7 @@ export default function MnistClassifier() {
     }
   };
 
-  const setPixel = (x: number, y: number, value: number) => {
+  const setPixel = (x: number, y: number, value: number, brushSize: number = 1) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -58,21 +58,34 @@ export default function MnistClassifier() {
     const pixelX = Math.floor((x - rect.left) / PIXEL_SIZE);
     const pixelY = Math.floor((y - rect.top) / PIXEL_SIZE);
 
-    if (pixelX >= 0 && pixelX < GRID_SIZE && pixelY >= 0 && pixelY < GRID_SIZE) {
-      const newGrid = [...grid];
-      newGrid[pixelY][pixelX] = value;
+    const newGrid = [...grid];
+    let changed = false;
+
+    // Draw with brush size for easier touch drawing
+    for (let dy = -Math.floor(brushSize / 2); dy <= Math.floor(brushSize / 2); dy++) {
+      for (let dx = -Math.floor(brushSize / 2); dx <= Math.floor(brushSize / 2); dx++) {
+        const px = pixelX + dx;
+        const py = pixelY + dy;
+        if (px >= 0 && px < GRID_SIZE && py >= 0 && py < GRID_SIZE) {
+          newGrid[py][px] = value;
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
       setGrid(newGrid);
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
-    setPixel(e.clientX, e.clientY, 1);
+    setPixel(e.clientX, e.clientY, 1, 2);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (isDrawing) {
-      setPixel(e.clientX, e.clientY, 1);
+      setPixel(e.clientX, e.clientY, 1, 2);
     }
   };
 
@@ -84,14 +97,14 @@ export default function MnistClassifier() {
     e.preventDefault();
     setIsDrawing(true);
     const touch = e.touches[0];
-    setPixel(touch.clientX, touch.clientY, 1);
+    setPixel(touch.clientX, touch.clientY, 1, 3);
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     if (isDrawing) {
       const touch = e.touches[0];
-      setPixel(touch.clientX, touch.clientY, 1);
+      setPixel(touch.clientX, touch.clientY, 1, 3);
     }
   };
 
@@ -181,9 +194,18 @@ export default function MnistClassifier() {
         </button>
       </div>
       {prediction && (
-        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+        <div style={{ marginTop: '1rem', textAlign: 'center', width: '100%', maxWidth: '400px' }}>
           <h3>Prediction:</h3>
-          <pre style={{ textAlign: 'left', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '4px' }}>
+          <pre style={{
+            textAlign: 'left',
+            backgroundColor: '#f5f5f5',
+            padding: '1rem',
+            borderRadius: '4px',
+            overflow: 'auto',
+            maxWidth: '100%',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word'
+          }}>
             {JSON.stringify(prediction, null, 2)}
           </pre>
         </div>
