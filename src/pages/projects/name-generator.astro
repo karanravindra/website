@@ -1,0 +1,152 @@
+---
+import NameGenerator from '../../components/NameGenerator';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>GPT Name Generator | Karan Ravindra</title>
+    <style>
+      a:visited {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body style="max-width: 800px; margin: auto; padding: 1rem;">
+    <header>
+      <nav aria-label="Page">
+        <a href="/">← Back to Home</a>
+      </nav>
+      <h1>GPT Name Generator</h1>
+    </header>
+    <main>
+      <section>
+        <h2>Interactive Demo</h2>
+        <p>
+          Generate creative names using a character-level language model. Adjust the parameters to
+          see how they affect the model's output.
+        </p>
+        <NameGenerator client:load />
+      </section>
+
+      <section>
+        <h2>About This Project</h2>
+        <p>
+          This is a character-level generative language model trained on a dataset of names. Unlike
+          word-level models, this model learns to predict text one character at a time, which makes
+          it well-suited for generating short, structured outputs like names.
+        </p>
+
+        <h3>How It Works</h3>
+        <p>
+          The name generator is built using the same principles as GPT (Generative Pre-trained Transformer)
+          models, but at a much smaller scale. Here's how it generates names:
+        </p>
+        <ol>
+          <li>
+            <strong>Character Embedding:</strong> Each character is converted into a numerical vector
+            that the model can understand.
+          </li>
+          <li>
+            <strong>Transformer Layers:</strong> The model uses self-attention mechanisms to understand
+            patterns in sequences of characters.
+          </li>
+          <li>
+            <strong>Next Character Prediction:</strong> For each position, the model predicts what
+            character is most likely to come next.
+          </li>
+          <li>
+            <strong>Sampling:</strong> Instead of always picking the most likely character, the model
+            samples from a probability distribution (controlled by temperature).
+          </li>
+          <li>
+            <strong>Generation:</strong> The model continues predicting characters until it generates
+            a complete name or reaches the maximum length.
+          </li>
+        </ol>
+
+        <h3>Architecture</h3>
+        <p>The model consists of:</p>
+        <ul>
+          <li><strong>Embedding Layer:</strong> Maps characters to dense vectors</li>
+          <li><strong>Positional Encoding:</strong> Adds information about character positions</li>
+          <li><strong>Transformer Blocks:</strong> Multiple layers of self-attention and feedforward networks</li>
+          <li><strong>Output Layer:</strong> Predicts probability distribution over all possible characters</li>
+        </ul>
+
+        <h3>Training Process</h3>
+        <p>
+          The model was trained on a dataset of thousands of names from various cultures and languages.
+          During training, it learned:
+        </p>
+        <ul>
+          <li>Common letter combinations (e.g., "th", "ch", "tion")</li>
+          <li>Typical name structures (capital first letter, vowel-consonant patterns)</li>
+          <li>Cultural naming patterns and phonetic rules</li>
+          <li>When to end a name (learning to predict end-of-sequence tokens)</li>
+        </ul>
+
+        <h3>Key Concepts Demonstrated</h3>
+        <ul>
+          <li>
+            <strong>Autoregressive Generation:</strong> The model generates one character at a time,
+            using its previous predictions as context for the next character.
+          </li>
+          <li>
+            <strong>Temperature Sampling:</strong> A hyperparameter that controls randomness. Higher
+            temperature = more creative but potentially less coherent outputs.
+          </li>
+          <li>
+            <strong>Self-Attention:</strong> The mechanism that allows the model to "pay attention"
+            to different parts of the input sequence when making predictions.
+          </li>
+          <li>
+            <strong>Transfer Learning Principles:</strong> While this model is trained from scratch,
+            it demonstrates the same architecture used in large language models like GPT-3 and GPT-4.
+          </li>
+        </ul>
+
+        <h3>Why Character-Level?</h3>
+        <p>
+          Character-level models have some interesting properties:
+        </p>
+        <ul>
+          <li>They can generate novel words that don't exist in the training data</li>
+          <li>They handle typos and spelling variations naturally</li>
+          <li>They work well with limited vocabulary tasks like name generation</li>
+          <li>They require smaller vocabulary sizes (just the alphabet vs. thousands of words)</li>
+        </ul>
+
+        <h3>Experiment Ideas</h3>
+        <p>Try adjusting the parameters to see how they affect generation:</p>
+        <ul>
+          <li>Low temperature (0.3): More conventional, realistic names</li>
+          <li>Medium temperature (0.8-1.0): Balanced creativity and realism</li>
+          <li>High temperature (1.5+): Unusual, creative combinations</li>
+          <li>Shorter max length: Concise, punchy names</li>
+          <li>Longer max length: More elaborate, compound names</li>
+        </ul>
+
+        <h3>Technologies Used</h3>
+        <ul>
+          <li><strong>PyTorch:</strong> Model architecture and training</li>
+          <li><strong>HuggingFace Transformers:</strong> Implementation framework</li>
+          <li><strong>React:</strong> Interactive parameter controls</li>
+          <li><strong>TypeScript:</strong> Type-safe frontend code</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Further Reading</h2>
+        <ul>
+          <li><a href="https://karpathy.github.io/2015/05/21/rnn-effectiveness/" target="_blank">The Unreasonable Effectiveness of Recurrent Neural Networks (Andrej Karpathy)</a></li>
+          <li><a href="https://jalammar.github.io/illustrated-gpt2/" target="_blank">The Illustrated GPT-2 (Jay Alammar)</a></li>
+          <li><a href="https://huggingface.co/docs/transformers/main_classes/text_generation" target="_blank">Text Generation with Transformers</a></li>
+          <li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need (Original Transformer Paper)</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

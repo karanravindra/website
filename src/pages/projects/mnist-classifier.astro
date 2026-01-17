@@ -1,0 +1,109 @@
+---
+import MnistClassifier from '../../components/MnistClassifier';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>MNIST Digit Classifier | Karan Ravindra</title>
+    <style>
+      a:visited {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body style="max-width: 800px; margin: auto; padding: 1rem;">
+    <header>
+      <nav aria-label="Page">
+        <a href="/">← Back to Home</a>
+      </nav>
+      <h1>MNIST Digit Classifier</h1>
+    </header>
+    <main>
+      <section>
+        <h2>Interactive Demo</h2>
+        <p>Draw a digit (0-9) on the grid below and click "Predict" to see what the model thinks it is.</p>
+        <MnistClassifier client:load />
+      </section>
+
+      <section>
+        <h2>About This Project</h2>
+        <p>
+          This is a simple neural network trained on the MNIST dataset, which contains 70,000 images
+          of handwritten digits. The model learns to recognize patterns in the pixel values and can
+          classify digits with high accuracy.
+        </p>
+
+        <h3>How It Works</h3>
+        <p>
+          The MNIST classifier uses a feedforward neural network architecture. When you draw on the
+          32x32 grid, each pixel's intensity (0 for white, 1 for black) is fed into the network as
+          input. The network consists of:
+        </p>
+        <ul>
+          <li><strong>Input layer:</strong> 1024 neurons (32x32 pixels)</li>
+          <li><strong>Hidden layers:</strong> Multiple layers with ReLU activation functions</li>
+          <li><strong>Output layer:</strong> 10 neurons (one for each digit 0-9) with softmax activation</li>
+        </ul>
+        <p>
+          The model was trained using PyTorch on the standard MNIST training set, achieving over 95%
+          accuracy on the test set. The training process involved optimizing the network's weights
+          using backpropagation and the Adam optimizer.
+        </p>
+
+        <h3>Key Concepts</h3>
+        <ul>
+          <li>
+            <strong>Supervised Learning:</strong> The model learns from labeled examples, where each
+            image is paired with its correct digit label.
+          </li>
+          <li>
+            <strong>Convolutional Neural Networks (CNNs):</strong> While this is a simple feedforward
+            network, more advanced MNIST classifiers use CNNs to better capture spatial patterns in images.
+          </li>
+          <li>
+            <strong>Gradient Descent:</strong> The optimization algorithm that adjusts the network's
+            weights to minimize prediction error.
+          </li>
+        </ul>
+
+        <h3>Model Details</h3>
+        <p>
+          The model is hosted on HuggingFace and can be accessed via their Inference API. The input
+          is a flattened array of 1024 values (32x32 grid), and the output is a probability distribution
+          over the 10 possible digits.
+        </p>
+
+        <h3>Try It Out</h3>
+        <p>
+          The drawing interface above lets you experiment with the model. Try drawing different styles
+          of digits and see how the model responds. You might notice:
+        </p>
+        <ul>
+          <li>The model works best with centered, clearly drawn digits</li>
+          <li>Certain digits (like 1 and 7) might be confused if drawn ambiguously</li>
+          <li>The model's confidence varies based on how "typical" your drawing looks</li>
+        </ul>
+
+        <h3>Technologies Used</h3>
+        <ul>
+          <li><strong>PyTorch:</strong> For model training and architecture</li>
+          <li><strong>HuggingFace:</strong> For model hosting and inference</li>
+          <li><strong>React:</strong> For the interactive drawing canvas</li>
+          <li><strong>TypeScript:</strong> For type-safe frontend code</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Further Reading</h2>
+        <ul>
+          <li><a href="http://yann.lecun.com/exdb/mnist/" target="_blank">MNIST Database (Yann LeCun)</a></li>
+          <li><a href="https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html" target="_blank">PyTorch Quickstart Tutorial</a></li>
+          <li><a href="https://huggingface.co/docs/api-inference/index" target="_blank">HuggingFace Inference API</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
