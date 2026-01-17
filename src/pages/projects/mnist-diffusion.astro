@@ -1,0 +1,225 @@
+---
+import MnistDiffusion from '../../components/MnistDiffusion';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>MNIST Diffusion Model | Karan Ravindra</title>
+    <style>
+      a:visited {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body style="max-width: 800px; margin: auto; padding: 1rem;">
+    <header>
+      <nav aria-label="Page">
+        <a href="/">← Back to Home</a>
+      </nav>
+      <h1>MNIST Diffusion Model</h1>
+    </header>
+    <main>
+      <section>
+        <h2>Interactive Demo</h2>
+        <p>
+          Generate handwritten digits from pure noise using a rectified flow-based diffusion model.
+          Select a target digit or generate random ones, and adjust the parameters to see how they
+          affect the generation process.
+        </p>
+        <MnistDiffusion client:load />
+      </section>
+
+      <section>
+        <h2>About This Project</h2>
+        <p>
+          This project implements a diffusion model for MNIST digit generation using rectified flow,
+          a modern approach to generative modeling. Unlike traditional classifiers that predict what
+          a digit is, this model can create new digit images from scratch.
+        </p>
+
+        <h3>What Are Diffusion Models?</h3>
+        <p>
+          Diffusion models are a class of generative models that learn to create data by reversing
+          a gradual noising process. Think of it like watching a photograph fade into static noise,
+          then learning to reverse that process to create new photographs from pure static.
+        </p>
+        <p>The process works in two phases:</p>
+        <ol>
+          <li>
+            <strong>Forward Process (Training Data):</strong> Take a real digit image and gradually
+            add noise until it becomes pure random noise. This is like slowly erasing the digit.
+          </li>
+          <li>
+            <strong>Reverse Process (Generation):</strong> Start with pure noise and gradually
+            remove noise to create a clear digit. This is what the model learns to do.
+          </li>
+        </ol>
+
+        <h3>Rectified Flow: A Modern Approach</h3>
+        <p>
+          Traditional diffusion models use complex noise schedules and many steps. Rectified flow
+          improves on this by:
+        </p>
+        <ul>
+          <li>
+            <strong>Straightening the path:</strong> Instead of a curved denoising trajectory,
+            rectified flow learns to take a more direct, straight-line path from noise to image.
+          </li>
+          <li>
+            <strong>Fewer steps needed:</strong> The straighter path means you can generate high-quality
+            images with fewer denoising steps, making generation faster.
+          </li>
+          <li>
+            <strong>Better interpolation:</strong> The model can smoothly blend between different
+            digits by interpolating along straight paths in the learned space.
+          </li>
+        </ul>
+
+        <h3>How It Works</h3>
+        <p>The diffusion model architecture consists of:</p>
+        <ul>
+          <li>
+            <strong>Noise Predictor Network:</strong> A U-Net or transformer that takes a noisy
+            image and a timestep, then predicts what noise to remove.
+          </li>
+          <li>
+            <strong>Time Embeddings:</strong> The model needs to know how noisy the current image is,
+            so the timestep is embedded and fed into the network.
+          </li>
+          <li>
+            <strong>Conditional Information:</strong> When you select a target digit, that information
+            is encoded and given to the model so it knows what to generate.
+          </li>
+          <li>
+            <strong>Iterative Refinement:</strong> The model denoises in small steps, gradually
+            revealing the digit.
+          </li>
+        </ul>
+
+        <h3>Training Process</h3>
+        <p>The model was trained by:</p>
+        <ol>
+          <li>Taking real MNIST digits from the training set</li>
+          <li>Adding random amounts of noise to them</li>
+          <li>Training the network to predict the noise that was added</li>
+          <li>Optimizing using a rectified flow objective that encourages straight paths</li>
+        </ol>
+        <p>
+          After training, the model learns the structure and patterns of handwritten digits, enabling
+          it to generate new, realistic-looking digits from pure noise.
+        </p>
+
+        <h3>Key Concepts</h3>
+        <ul>
+          <li>
+            <strong>Denoising Score Matching:</strong> The core idea that you can learn a generative
+            model by learning to denoise data at various noise levels.
+          </li>
+          <li>
+            <strong>Conditional Generation:</strong> Guiding the model to generate specific digits
+            rather than random ones, using classifier-free guidance.
+          </li>
+          <li>
+            <strong>Flow Matching:</strong> The mathematical framework that enables learning straight
+            paths from noise to data.
+          </li>
+          <li>
+            <strong>Sampling:</strong> The process of starting with noise and iteratively denoising
+            to generate a final image.
+          </li>
+        </ul>
+
+        <h3>Comparison with Other Generative Models</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+          <tr style="border-bottom: 2px solid #333;">
+            <th style="text-align: left; padding: 0.5rem;">Model Type</th>
+            <th style="text-align: left; padding: 0.5rem;">Pros</th>
+            <th style="text-align: left; padding: 0.5rem;">Cons</th>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 0.5rem;"><strong>GANs</strong></td>
+            <td style="padding: 0.5rem;">Fast generation, sharp images</td>
+            <td style="padding: 0.5rem;">Hard to train, mode collapse</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 0.5rem;"><strong>VAEs</strong></td>
+            <td style="padding: 0.5rem;">Stable training, good latent space</td>
+            <td style="padding: 0.5rem;">Blurry outputs</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 0.5rem;"><strong>Diffusion</strong></td>
+            <td style="padding: 0.5rem;">High quality, stable training, diversity</td>
+            <td style="padding: 0.5rem;">Slower generation (many steps)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.5rem;"><strong>Rectified Flow</strong></td>
+            <td style="padding: 0.5rem;">All diffusion benefits + faster generation</td>
+            <td style="padding: 0.5rem;">Still slower than GANs</td>
+          </tr>
+        </table>
+
+        <h3>Why MNIST?</h3>
+        <p>
+          MNIST is perfect for learning about diffusion models because:
+        </p>
+        <ul>
+          <li>The images are small (28x28) so models train quickly</li>
+          <li>The task is simple enough to see clear results</li>
+          <li>It's complex enough to demonstrate key concepts</li>
+          <li>You can visually inspect the quality of generated digits</li>
+        </ul>
+
+        <h3>Experiment Ideas</h3>
+        <p>Try different parameter combinations:</p>
+        <ul>
+          <li>
+            <strong>Few steps (10-20) + Low guidance:</strong> Fast but potentially unclear digits
+          </li>
+          <li>
+            <strong>Many steps (80-100) + High guidance:</strong> Slow but very clear, precise digits
+          </li>
+          <li>
+            <strong>Medium steps (40-60) + Medium guidance:</strong> Balanced quality and speed
+          </li>
+          <li>
+            <strong>Random vs. Conditional:</strong> Compare random generation to targeting specific digits
+          </li>
+        </ul>
+
+        <h3>Real-World Applications</h3>
+        <p>
+          While this demo generates simple digits, the same techniques power:
+        </p>
+        <ul>
+          <li><strong>Stable Diffusion:</strong> Text-to-image generation</li>
+          <li><strong>DALL-E:</strong> Creative image synthesis</li>
+          <li><strong>Imagen:</strong> High-resolution image generation</li>
+          <li><strong>Medical Imaging:</strong> Generating synthetic medical data</li>
+          <li><strong>Video Generation:</strong> Creating video content from text</li>
+        </ul>
+
+        <h3>Technologies Used</h3>
+        <ul>
+          <li><strong>PyTorch:</strong> Model implementation and training</li>
+          <li><strong>HuggingFace Diffusers:</strong> Diffusion model framework</li>
+          <li><strong>React:</strong> Interactive parameter controls and visualization</li>
+          <li><strong>TypeScript:</strong> Type-safe frontend code</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Further Reading</h2>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2006.11239" target="_blank">Denoising Diffusion Probabilistic Models (DDPM Paper)</a></li>
+          <li><a href="https://arxiv.org/abs/2209.03003" target="_blank">Flow Matching for Generative Modeling</a></li>
+          <li><a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" target="_blank">What are Diffusion Models? (Lilian Weng)</a></li>
+          <li><a href="https://huggingface.co/docs/diffusers/index" target="_blank">HuggingFace Diffusers Documentation</a></li>
+          <li><a href="https://yang-song.net/blog/2021/score/" target="_blank">Generative Modeling by Estimating Gradients (Yang Song)</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
