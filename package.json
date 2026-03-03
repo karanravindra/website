@@ -9,7 +9,10 @@
 		"astro": "astro"
 	},
 	"dependencies": {
+		"@astrojs/alpinejs": "^0.4.9",
 		"@astrojs/cloudflare": "^12.6.12",
+		"@types/alpinejs": "^3.13.11",
+		"alpinejs": "^3.15.8",
 		"astro": "^5.16.6"
 	},
 	"devDependencies": {

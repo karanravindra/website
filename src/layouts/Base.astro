@@ -1,0 +1,33 @@
+---
+
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <style>
+            a:visited {
+                color: blue;
+            }
+        </style>
+        <title>Karan Ravindra</title>
+    </head>
+    <body style="max-width: 800px; margin: auto; padding: 1rem;">
+        <header>
+            <nav aria-label="Page">
+                <ul
+                    style="list-style: none; padding: 0; display: flex; gap: 1rem;"
+                >
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/projects">Projects</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main>
+          <slot />
+        </main>
+    </body>
+</html>
