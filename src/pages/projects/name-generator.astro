@@ -1,0 +1,253 @@
+---
+import Base from "../../layouts/Base.astro";
+import "../../styles/lab.css";
+---
+
+<Base
+  title="Baby Name Generator — Karan Ravindra"
+  description="An interactive scaffold for a gender-conditioned RNN/LSTM baby name generator."
+>
+  <header class="lab-hero">
+    <div>
+      <p class="eyebrow">Sequence desk · RNN / LSTM</p>
+      <h1>A name, one character at a time.</h1>
+    </div>
+    <div class="lab-hero-copy">
+      <p class="mock-label">Prototype edition · Synthetic data</p>
+      <p>
+        Condition a recurrent model on gender, tune its appetite for surprise,
+        and sample names inspired by the shape of popular baby-name data.
+      </p>
+      <p class="lab-status">Interface live · Model placeholder</p>
+    </div>
+  </header>
+
+  <section class="lab-frame" aria-labelledby="generator-heading">
+    <div class="lab-frame-heading">
+      <h2 id="generator-heading">The naming desk</h2>
+      <p class="lab-status">Generated locally from mock syllables</p>
+    </div>
+
+    <div class="lab-workspace" x-data="nameGeneratorApp()">
+      <form class="lab-controls" @submit.prevent="generateBatch()">
+        <p class="lab-kicker">01 · Set the conditions</p>
+
+        <fieldset class="field-group">
+          <legend class="field-label">Gender condition</legend>
+          <div class="choice-row">
+            <button type="button" :class="{ active: gender === 'feminine' }" @click="gender = 'feminine'; generateBatch()">Feminine</button>
+            <button type="button" :class="{ active: gender === 'masculine' }" @click="gender = 'masculine'; generateBatch()">Masculine</button>
+            <button type="button" :class="{ active: gender === 'any' }" @click="gender = 'any'; generateBatch()">Any</button>
+          </div>
+        </fieldset>
+
+        <div class="field-group">
+          <label class="field-label" for="temperature">Temperature · <span x-text="temperature"></span></label>
+          <input id="temperature" type="range" min="0.3" max="1.5" step="0.1" x-model="temperature" />
+          <div class="range-line"><span>Familiar</span><span>Surprising</span></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="name-length">Preferred length</label>
+          <select id="name-length" x-model="length">
+            <option value="short">Short · 3–5 letters</option>
+            <option value="medium">Medium · 5–8 letters</option>
+            <option value="long">Long · 8–11 letters</option>
+            <option value="any">Any length</option>
+          </select>
+        </div>
+
+        <button class="lab-button" type="submit">Generate eight names</button>
+
+        <dl class="lab-stats">
+          <div class="lab-stat"><dt>Corpus</dt><dd>10,240</dd></div>
+          <div class="lab-stat"><dt>Epoch</dt><dd>24 / 50</dd></div>
+          <div class="lab-stat"><dt>Loss</dt><dd>1.82</dd></div>
+        </dl>
+      </form>
+
+      <div class="lab-results">
+        <div class="result-heading">
+          <div>
+            <p class="lab-kicker">02 · Candidate names</p>
+            <p>Sample run <span x-text="runId"></span></p>
+          </div>
+          <p class="result-meta">Likelihoods are illustrative</p>
+        </div>
+
+        <ol class="name-list">
+          <template x-for="(item, index) in names" :key="`${runId}-${index}`">
+            <li>
+              <span class="name-index" x-text="String(index + 1).padStart(2, '0')"></span>
+              <strong x-text="item.name"></strong>
+              <span class="name-condition" x-text="item.condition"></span>
+              <span class="name-score" x-text="item.score"></span>
+            </li>
+          </template>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="lab-notes" aria-label="Prototype notes">
+    <article>
+      <p class="lab-kicker">Condition</p>
+      <h2>Gender becomes context.</h2>
+      <p>A learned embedding would prime the hidden state before the first character is sampled.</p>
+    </article>
+    <article>
+      <p class="lab-kicker">Sequence</p>
+      <h2>Characters arrive in order.</h2>
+      <p>The RNN or LSTM predicts a distribution over the next letter until it emits an end token.</p>
+    </article>
+    <article>
+      <p class="lab-kicker">Current state</p>
+      <h2>The interface is ahead of the model.</h2>
+      <p>Names and likelihoods are synthetic for now; the controls are ready to accept real inference.</p>
+    </article>
+  </section>
+
+  <script is:inline>
+    function nameGeneratorApp() {
+      const pools = {
+        feminine: {
+          starts: ["al", "el", "ma", "so", "li", "av", "ca", "mi", "no", "is"],
+          middles: ["ri", "la", "vi", "na", "el", "sa", "ora", "ia", "mi"],
+          ends: ["a", "ia", "elle", "ine", "ara", "lyn", "ora", "ette"],
+        },
+        masculine: {
+          starts: ["li", "no", "eth", "ja", "ca", "ro", "the", "ev", "ma", "ben"],
+          middles: ["an", "ri", "o", "el", "ar", "en", "ian", "as", "eo"],
+          ends: ["n", "o", "er", "ian", "as", "en", "ett", "iel"],
+        },
+      };
+
+      return {
+        gender: "any",
+        temperature: "0.8",
+        length: "medium",
+        runId: "A-001",
+        runCount: 1,
+        names: [],
+
+        init() {
+          this.generateBatch();
+        },
+
+        pick(list) {
+          return list[Math.floor(Math.random() * list.length)];
+        },
+
+        makeName(condition) {
+          const pool = pools[condition];
+          const target = this.length === "short" ? 4 : this.length === "long" ? 9 : this.length === "any" ? 3 + Math.floor(Math.random() * 8) : 6;
+          const temperature = Number(this.temperature);
+          let name = this.pick(pool.starts);
+
+          if (name.length < target - 2 && (temperature > 0.65 || Math.random() > 0.35)) {
+            name += this.pick(pool.middles);
+          }
+          if (name.length < target - 1 && this.length === "long") {
+            name += this.pick(pool.middles);
+          }
+          name += this.pick(pool.ends);
+
+          if (this.length === "short") name = name.slice(0, 5);
+          if (this.length === "medium" && name.length > 8) name = name.slice(0, 8);
+          if (this.length === "long" && name.length < 8) name += this.pick(pool.ends);
+
+          return name.charAt(0).toUpperCase() + name.slice(1);
+        },
+
+        generateBatch() {
+          this.runCount += 1;
+          this.runId = `A-${String(this.runCount).padStart(3, "0")}`;
+          const seen = new Set();
+          const results = [];
+
+          while (results.length < 8) {
+            const condition = this.gender === "any" ? (Math.random() > 0.5 ? "feminine" : "masculine") : this.gender;
+            const name = this.makeName(condition);
+            if (seen.has(name)) continue;
+            seen.add(name);
+            const score = Math.max(2.4, 14 - Number(this.temperature) * 3.2 - Math.random() * 4.5);
+            results.push({
+              name,
+              condition: condition === "feminine" ? "F" : "M",
+              score: `${score.toFixed(1)}%`,
+            });
+          }
+          this.names = results;
+        },
+      };
+    }
+  </script>
+</Base>
+
+<style>
+  .result-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    padding-bottom: 0.8rem;
+    border-bottom: 4px solid var(--rule);
+  }
+
+  .result-heading p {
+    margin-bottom: 0;
+  }
+
+  .name-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .name-list li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem 4rem;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid #aaa292;
+  }
+
+  .name-index,
+  .name-condition,
+  .name-score {
+    font: 800 0.68rem/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .name-index,
+  .name-condition {
+    color: var(--accent);
+  }
+
+  .name-list strong {
+    font-size: clamp(1.5rem, 2.6vw, 2.35rem);
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .name-score {
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  @media (max-width: 520px) {
+    .result-heading {
+      display: block;
+    }
+
+    .result-meta {
+      margin-top: 0.5rem !important;
+    }
+
+    .name-list li {
+      grid-template-columns: 1.75rem minmax(0, 1fr) 2rem 3.4rem;
+      gap: 0.5rem;
+    }
+  }
+</style>

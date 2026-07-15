@@ -1,0 +1,351 @@
+---
+import Base from "../../layouts/Base.astro";
+import "../../styles/lab.css";
+---
+
+<Base
+  title="MNIST DINO Attention Visualizer — Karan Ravindra"
+  description="An interactive scaffold for exploring transformer attention heatmaps on MNIST digits."
+>
+  <header class="lab-hero">
+    <div>
+      <p class="eyebrow">Interpretability desk · DINO / ViT</p>
+      <h1>Where does the model look?</h1>
+    </div>
+    <div class="lab-hero-copy">
+      <p class="mock-label">Prototype edition · Synthetic attention</p>
+      <p>
+        Move through transformer layers and compare six attention heads. Warm
+        regions represent the patches receiving the strongest simulated focus.
+      </p>
+      <p class="lab-status">Heatmap renderer live · Attention is mocked</p>
+    </div>
+  </header>
+
+  <section class="lab-frame" aria-labelledby="visualizer-heading">
+    <div class="lab-frame-heading">
+      <h2 id="visualizer-heading">The attention desk</h2>
+      <p class="lab-status">Illustrative maps · Not model inference</p>
+    </div>
+
+    <div class="lab-workspace" x-data="dinoVisualizerApp()">
+      <form class="lab-controls" @submit.prevent="randomize()">
+        <p class="lab-kicker">01 · Select a view</p>
+
+        <div class="field-group">
+          <label class="field-label" for="dino-digit">Input digit</label>
+          <select id="dino-digit" x-model="digit" @change="randomize()">
+            <template x-for="number in 10" :key="number - 1">
+              <option :value="String(number - 1)" x-text="number - 1"></option>
+            </template>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="layer">Transformer layer · <span x-text="layer"></span></label>
+          <input id="layer" type="range" min="1" max="12" step="1" x-model="layer" @input="updateMetrics()" />
+          <div class="range-line"><span>Local edges</span><span>Global shape</span></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="threshold">Attention threshold · <span x-text="threshold"></span></label>
+          <input id="threshold" type="range" min="0.1" max="0.9" step="0.1" x-model="threshold" />
+          <div class="range-line"><span>Broad</span><span>Selective</span></div>
+        </div>
+
+        <button class="lab-button" type="submit">New handwritten sample</button>
+
+        <dl class="lab-stats">
+          <div class="lab-stat"><dt>Heads</dt><dd>6</dd></div>
+          <div class="lab-stat"><dt>Patches</dt><dd>49</dd></div>
+          <div class="lab-stat"><dt>Layer</dt><dd x-text="layer"></dd></div>
+        </dl>
+      </form>
+
+      <div class="lab-results">
+        <div class="attention-heading">
+          <div>
+            <p class="lab-kicker">02 · Attention report</p>
+            <p>Sample <span x-text="sampleId"></span></p>
+          </div>
+          <p class="result-meta">CLS token → image patches</p>
+        </div>
+
+        <div class="source-strip">
+          <article class="source-card">
+            <canvas
+              width="112"
+              height="112"
+              aria-label="Synthetic MNIST source digit"
+              x-effect="seed; digit; $nextTick(() => drawSource($el))"></canvas>
+            <div><span>Input</span><strong x-text="digit"></strong></div>
+          </article>
+
+          <div class="attention-summary">
+            <p class="lab-kicker">Layer summary</p>
+            <div class="summary-number"><strong x-text="meanFocus"></strong><span>mean focus</span></div>
+            <dl>
+              <div><dt>Attention entropy</dt><dd x-text="entropy"></dd></div>
+              <div><dt>Active patches</dt><dd x-text="activePatches"></dd></div>
+              <div><dt>Strongest head</dt><dd x-text="strongestHead"></dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="attention-grid">
+          <template x-for="head in heads" :key="`${sampleId}-${layer}-${head.id}`">
+            <article class="attention-card">
+              <canvas
+                width="112"
+                height="112"
+                :aria-label="`Synthetic attention heatmap for head ${head.id}`"
+                x-effect="seed; layer; threshold; digit; $nextTick(() => drawAttention($el, head))"></canvas>
+              <div><strong x-text="`Head ${head.id}`"></strong><span x-text="head.score"></span></div>
+            </article>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lab-notes" aria-label="Prototype notes">
+    <article>
+      <p class="lab-kicker">Input</p>
+      <h2>The image becomes patches.</h2>
+      <p>A vision transformer would turn the digit into a sequence of patch tokens plus a global CLS token.</p>
+    </article>
+    <article>
+      <p class="lab-kicker">Attention</p>
+      <h2>Each head sees differently.</h2>
+      <p>Heads can emphasize edges, intersections, stroke endings, empty space, or the overall silhouette.</p>
+    </article>
+    <article>
+      <p class="lab-kicker">Current state</p>
+      <h2>The heat is illustrative.</h2>
+      <p>All maps and metrics are seeded random data until real DINO attention tensors are connected.</p>
+    </article>
+  </section>
+
+  <script is:inline>
+    function dinoVisualizerApp() {
+      return {
+        digit: "8",
+        layer: "8",
+        threshold: "0.4",
+        seed: 8412,
+        sampleCount: 0,
+        sampleId: "D-000",
+        meanFocus: "62%",
+        entropy: "1.84",
+        activePatches: "18 / 49",
+        strongestHead: "H4",
+        heads: Array.from({ length: 6 }, (_, index) => ({ id: index + 1, score: "0.00" })),
+
+        init() {
+          this.randomize();
+        },
+
+        seeded(seed) {
+          let value = seed % 2147483647;
+          return () => {
+            value = (value * 16807) % 2147483647;
+            return (value - 1) / 2147483646;
+          };
+        },
+
+        randomize() {
+          this.sampleCount += 1;
+          this.sampleId = `D-${String(this.sampleCount).padStart(3, "0")}`;
+          this.seed = Math.floor(Math.random() * 900000) + 100000;
+          this.updateMetrics();
+        },
+
+        updateMetrics() {
+          const random = this.seeded(this.seed + Number(this.layer) * 101);
+          this.heads = this.heads.map((head) => ({ ...head, score: (0.42 + random() * 0.53).toFixed(2) }));
+          const scores = this.heads.map((head) => Number(head.score));
+          const best = scores.indexOf(Math.max(...scores));
+          this.meanFocus = `${Math.round(48 + random() * 35)}%`;
+          this.entropy = (1.2 + random() * 1.1).toFixed(2);
+          this.activePatches = `${Math.round(10 + random() * 22)} / 49`;
+          this.strongestHead = `H${best + 1}`;
+        },
+
+        drawDigit(ctx, size) {
+          const random = this.seeded(this.seed);
+          ctx.fillStyle = "#11110e";
+          ctx.fillRect(0, 0, size, size);
+          ctx.save();
+          ctx.translate(size / 2 + (random() - 0.5) * 8, size / 2 + (random() - 0.5) * 8);
+          ctx.rotate((random() - 0.5) * 0.18);
+          ctx.fillStyle = "#f3efe4";
+          ctx.font = `${Math.round(size * 0.74)}px Georgia`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(this.digit, 0, size * 0.03);
+          ctx.restore();
+        },
+
+        drawSource(canvas) {
+          const ctx = canvas.getContext("2d");
+          this.drawDigit(ctx, canvas.width);
+        },
+
+        drawAttention(canvas, head) {
+          const ctx = canvas.getContext("2d");
+          this.drawDigit(ctx, canvas.width);
+          const random = this.seeded(this.seed + head.id * 991 + Number(this.layer) * 313);
+          const threshold = Number(this.threshold);
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
+          const spots = Math.max(2, Math.round(7 - threshold * 5));
+          for (let index = 0; index < spots; index++) {
+            const x = canvas.width * (0.18 + random() * 0.64);
+            const y = canvas.height * (0.12 + random() * 0.76);
+            const radius = canvas.width * (0.12 + random() * 0.17);
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, `rgba(255, 224, 84, ${0.75 + random() * 0.2})`);
+            gradient.addColorStop(0.42, `rgba(212, 54, 30, ${0.5 + random() * 0.25})`);
+            gradient.addColorStop(1, "rgba(111, 17, 13, 0)");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+          ctx.restore();
+        },
+      };
+    }
+  </script>
+</Base>
+
+<style>
+  .attention-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    padding-bottom: 0.8rem;
+    border-bottom: 4px solid var(--rule);
+  }
+
+  .attention-heading p {
+    margin-bottom: 0;
+  }
+
+  .source-strip {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.38fr) minmax(0, 0.62fr);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .source-card {
+    padding: 1rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  .source-card canvas {
+    display: block;
+    width: 100%;
+    max-width: 190px;
+    aspect-ratio: 1;
+    image-rendering: pixelated;
+  }
+
+  .source-card > div,
+  .attention-card > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 0.45rem;
+    font: 800 0.62rem/1 var(--sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .source-card strong {
+    color: var(--accent);
+    font-size: 1.25rem;
+  }
+
+  .attention-summary {
+    padding: 1rem 1.25rem;
+  }
+
+  .summary-number {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .summary-number strong {
+    color: var(--accent);
+    font-size: clamp(2.6rem, 5vw, 4.5rem);
+    letter-spacing: -0.06em;
+    line-height: 1;
+  }
+
+  .summary-number span,
+  .attention-summary dt,
+  .attention-summary dd {
+    font: 800 0.6rem/1.2 var(--mono);
+    text-transform: uppercase;
+  }
+
+  .attention-summary dl {
+    margin: 0;
+  }
+
+  .attention-summary dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-top: 1px solid #aaa292;
+  }
+
+  .attention-summary dd {
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .attention-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-left: 1px solid var(--rule);
+  }
+
+  .attention-card {
+    min-width: 0;
+    padding: 0.7rem;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .attention-card canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--ink);
+    image-rendering: pixelated;
+  }
+
+  .attention-card span {
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+
+  @media (max-width: 560px) {
+    .source-strip {
+      grid-template-columns: 1fr;
+    }
+
+    .source-card {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .attention-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

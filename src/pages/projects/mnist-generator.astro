@@ -1,0 +1,248 @@
+---
+import Base from "../../layouts/Base.astro";
+import "../../styles/lab.css";
+---
+
+<Base
+  title="MNIST Image Generator — Karan Ravindra"
+  description="An interactive scaffold for generating handwritten MNIST-style digit samples."
+>
+  <header class="lab-hero">
+    <div>
+      <p class="eyebrow">Generative desk · Image synthesis</p>
+      <h1>Imagined digits, sampled on demand.</h1>
+    </div>
+    <div class="lab-hero-copy">
+      <p class="mock-label">Prototype edition · Synthetic data</p>
+      <p>
+        Pick a target digit and explore a placeholder latent space. Each specimen
+        sheet previews the controls and output shape of a future generative model.
+      </p>
+      <p class="lab-status">Canvas renderer live · Model placeholder</p>
+    </div>
+  </header>
+
+  <section class="lab-frame" aria-labelledby="generator-heading">
+    <div class="lab-frame-heading">
+      <h2 id="generator-heading">The specimen generator</h2>
+      <p class="lab-status">Samples are typographic mock data</p>
+    </div>
+
+    <div class="lab-workspace" x-data="mnistGeneratorApp()">
+      <form class="lab-controls" @submit.prevent="generate()">
+        <p class="lab-kicker">01 · Define the batch</p>
+
+        <div class="field-group">
+          <label class="field-label" for="target-digit">Target digit</label>
+          <select id="target-digit" x-model="digit" @change="generate()">
+            <option value="random">Random mix</option>
+            <template x-for="number in 10" :key="number - 1">
+              <option :value="String(number - 1)" x-text="number - 1"></option>
+            </template>
+          </select>
+        </div>
+
+        <fieldset class="field-group">
+          <legend class="field-label">Samples</legend>
+          <div class="choice-row">
+            <button type="button" :class="{ active: count === 4 }" @click="count = 4; generate()">Four</button>
+            <button type="button" :class="{ active: count === 8 }" @click="count = 8; generate()">Eight</button>
+            <button type="button" :class="{ active: count === 12 }" @click="count = 12; generate()">Twelve</button>
+          </div>
+        </fieldset>
+
+        <div class="field-group">
+          <label class="field-label" for="diversity">Latent diversity · <span x-text="diversity"></span></label>
+          <input id="diversity" type="range" min="0.1" max="1" step="0.1" x-model="diversity" />
+          <div class="range-line"><span>Consistent</span><span>Experimental</span></div>
+        </div>
+
+        <button class="lab-button" type="submit">Sample a new sheet</button>
+
+        <dl class="lab-stats">
+          <div class="lab-stat"><dt>Latent</dt><dd>64d</dd></div>
+          <div class="lab-stat"><dt>Size</dt><dd>28²</dd></div>
+          <div class="lab-stat"><dt>Batch</dt><dd x-text="count"></dd></div>
+        </dl>
+      </form>
+
+      <div class="lab-results">
+        <div class="sheet-heading">
+          <div>
+            <p class="lab-kicker">02 · Generated sheet</p>
+            <p>Batch <span x-text="batchId"></span></p>
+          </div>
+          <p class="result-meta">Target · <span x-text="digit === 'random' ? 'mixed' : digit"></span></p>
+        </div>
+
+        <div class="sample-grid" :class="`samples-${count}`">
+          <template x-for="sample in samples" :key="sample.id">
+            <article class="sample-card">
+              <canvas
+                width="28"
+                height="28"
+                :aria-label="`Synthetic sample of digit ${sample.digit}`"
+                x-effect="sample.seed; $nextTick(() => drawCanvas($el, sample))"></canvas>
+              <div>
+                <strong x-text="sample.digit"></strong>
+                <span x-text="sample.latent"></span>
+              </div>
+            </article>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lab-notes" aria-label="Prototype notes">
+    <article>
+      <p class="lab-kicker">Condition</p>
+      <h2>Choose what to imagine.</h2>
+      <p>The target digit would be embedded and combined with a random latent vector before decoding.</p>
+    </article>
+    <article>
+      <p class="lab-kicker">Diversity</p>
+      <h2>Move through latent space.</h2>
+      <p>Higher diversity should produce more varied stroke weight, slant, position, and writing style.</p>
+    </article>
+    <article>
+      <p class="lab-kicker">Current state</p>
+      <h2>The pixels are stand-ins.</h2>
+      <p>The scaffold uses randomized canvas typography until a VAE, GAN, or diffusion checkpoint is wired in.</p>
+    </article>
+  </section>
+
+  <script is:inline>
+    function mnistGeneratorApp() {
+      return {
+        digit: "random",
+        count: 8,
+        diversity: "0.6",
+        batchNumber: 0,
+        batchId: "G-0000",
+        samples: [],
+
+        init() {
+          this.generate();
+        },
+
+        generate() {
+          this.batchNumber += 1;
+          this.batchId = `G-${String(this.batchNumber).padStart(4, "0")}`;
+          this.samples = Array.from({ length: this.count }, (_, index) => {
+            const renderedDigit = this.digit === "random" ? String(Math.floor(Math.random() * 10)) : this.digit;
+            const seed = Math.floor(Math.random() * 999999);
+            return {
+              id: `${this.batchId}-${index}`,
+              digit: renderedDigit,
+              seed,
+              latent: `z${seed.toString(16).slice(0, 4).toUpperCase()}`,
+            };
+          });
+        },
+
+        seeded(seed) {
+          let value = seed % 2147483647;
+          return () => {
+            value = (value * 16807) % 2147483647;
+            return (value - 1) / 2147483646;
+          };
+        },
+
+        drawCanvas(canvas, sample) {
+          const ctx = canvas.getContext("2d");
+          const random = this.seeded(sample.seed);
+          const diversity = Number(this.diversity);
+          ctx.clearRect(0, 0, 28, 28);
+          ctx.fillStyle = "#11110e";
+          ctx.fillRect(0, 0, 28, 28);
+
+          ctx.save();
+          ctx.translate(14 + (random() - 0.5) * 3 * diversity, 14 + (random() - 0.5) * 3 * diversity);
+          ctx.rotate((random() - 0.5) * 0.28 * diversity);
+          ctx.font = `${21 + Math.round(random() * 4)}px Georgia`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#f4f0e5";
+          ctx.fillText(sample.digit, 0, 1);
+          ctx.restore();
+
+          const noiseCount = Math.round(4 + diversity * 12);
+          for (let index = 0; index < noiseCount; index++) {
+            const x = Math.floor(random() * 28);
+            const y = Math.floor(random() * 28);
+            const alpha = 0.04 + random() * 0.12 * diversity;
+            ctx.fillStyle = `rgba(244, 240, 229, ${alpha})`;
+            ctx.fillRect(x, y, 1, 1);
+          }
+        },
+      };
+    }
+  </script>
+</Base>
+
+<style>
+  .sheet-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    padding-bottom: 0.8rem;
+    border-bottom: 4px solid var(--rule);
+  }
+
+  .sheet-heading p {
+    margin-bottom: 0;
+  }
+
+  .sample-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    border-left: 1px solid var(--rule);
+  }
+
+  .sample-card {
+    min-width: 0;
+    padding: 0.7rem;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .sample-card canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--ink);
+    image-rendering: pixelated;
+  }
+
+  .sample-card > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 0.5rem;
+  }
+
+  .sample-card strong {
+    color: var(--accent);
+    font-size: 1.15rem;
+  }
+
+  .sample-card span {
+    color: var(--ink-soft);
+    font: 700 0.58rem/1 var(--mono);
+  }
+
+  @media (max-width: 980px) {
+    .sample-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .sample-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

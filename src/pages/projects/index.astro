@@ -2,20 +2,408 @@
 import Base from "../../layouts/Base.astro";
 ---
 
-<Base>
-  <section>
-    <h1>My Projects</h1>
-    <p>
-      These are some of the projects that I have done and am allowed to share.
-    </p>
-    <ul>
-      <li>
-        <h2>MNIST Classifier</h2>
-        <a href="/projects/mnist">Demo</a>
-        <p>
-          A simple MNIST Classifier built with PyTorch, trained on <a href="#">QMNIST</a>. 
+<Base
+  title="Projects — Karan Ravindra"
+  description="Selected software, machine learning, and data projects by Karan Ravindra."
+>
+  <header class="projects-header">
+    <p class="eyebrow">Special section · The workshop</p>
+    <h1>Projects built to answer a question.</h1>
+    <div class="projects-intro">
+      <p class="standfirst">
+        Experiments in useful interfaces, applied machine learning, and the
+        infrastructure that turns an idea into something you can touch.
+      </p>
+      <p class="issue-note">
+        <span>Current issue</span>
+        Four interactive experiments spanning discriminative and generative models.
+      </p>
+    </div>
+  </header>
+
+  <section class="project-ledger" aria-label="Selected projects">
+    <article class="project-card">
+      <div class="project-number">Project No. 001</div>
+      <div class="project-copy">
+        <p class="dateline">Machine Learning · Interactive</p>
+        <h2>MNIST Digit Recognizer</h2>
+        <p class="project-deck">
+          A tiny convolutional neural network tries to identify the digit you
+          draw—live, in the browser, and with no server round trip.
         </p>
-      </li>
-    </ul>
+        <p>
+          The model was trained with PyTorch on QMNIST, exported to ONNX, and
+          wired into a deliberately simple canvas interface. The result is less
+          a polished product than a transparent field test: draw, watch, revise.
+        </p>
+        <a class="story-link" href="/projects/mnist">Open the live desk</a>
+      </div>
+      <div class="project-aside">
+        <dl>
+          <div><dt>Medium</dt><dd>Web experiment</dd></div>
+          <div><dt>Model</dt><dd>CNN / ONNX</dd></div>
+          <div><dt>Input</dt><dd>32 × 32 pixels</dd></div>
+          <div><dt>Status</dt><dd>Live</dd></div>
+        </dl>
+        <p class="live-mark"><span></span> Running in browser</p>
+      </div>
+    </article>
   </section>
+
+  <section class="new-projects" aria-labelledby="new-projects-heading">
+    <p class="section-label" id="new-projects-heading">New from the lab</p>
+    <div class="brief-grid">
+      <article class="project-brief">
+        <p class="project-number">Project No. 002</p>
+        <p class="dateline">Sequence Models · Interactive</p>
+        <h2>Baby Name Generator</h2>
+        <p>
+          A gender-conditioned RNN/LSTM concept that invents names one character
+          at a time. The current edition uses synthetic syllables and scores.
+        </p>
+        <div class="brief-meta"><span>RNN / LSTM</span><span>Mock data</span></div>
+        <a class="story-link" href="/projects/name-generator">Open the naming desk</a>
+      </article>
+
+      <article class="project-brief">
+        <p class="project-number">Project No. 003</p>
+        <p class="dateline">Generative Models · Interactive</p>
+        <h2>MNIST Image Generator</h2>
+        <p>
+          Choose a target digit and sample a sheet of imagined handwriting from
+          a placeholder latent space, complete with diversity controls.
+        </p>
+        <div class="brief-meta"><span>Generator</span><span>Mock samples</span></div>
+        <a class="story-link" href="/projects/mnist-generator">Generate a specimen sheet</a>
+      </article>
+
+      <article class="project-brief">
+        <p class="project-number">Project No. 004</p>
+        <p class="dateline">Interpretability · Interactive</p>
+        <h2>MNIST DINO Visualizer</h2>
+        <p>
+          Inspect simulated attention heads across transformer layers to see
+          which parts of a handwritten digit attract the model’s focus.
+        </p>
+        <div class="brief-meta"><span>DINO / ViT</span><span>Mock attention</span></div>
+        <a class="story-link" href="/projects/mnist-dino">Inspect the attention desk</a>
+      </article>
+    </div>
+  </section>
+
+  <aside class="archive-note">
+    <p class="section-label">From the editor</p>
+    <blockquote>
+      “The archive is intentionally selective. I would rather publish one
+      working thing than ten case-study thumbnails.”
+    </blockquote>
+    <p>— Karan</p>
+  </aside>
 </Base>
+
+<style>
+  .projects-header {
+    padding-bottom: clamp(2.5rem, 6vw, 5rem);
+    border-bottom: 4px double var(--rule);
+  }
+
+  .projects-header h1 {
+    max-width: 1000px;
+    margin: 0.2em 0 0.3em;
+    font-size: clamp(3.75rem, 6vw, 6.25rem);
+    font-weight: 900;
+    letter-spacing: -0.07em;
+    line-height: 0.83;
+  }
+
+  .projects-intro {
+    display: grid;
+    grid-template-columns: 1.5fr 0.5fr;
+    gap: 3rem;
+    align-items: end;
+  }
+
+  .standfirst {
+    max-width: 780px;
+    margin: 0;
+    font-size: clamp(1.2rem, 2.3vw, 1.65rem);
+    line-height: 1.35;
+  }
+
+  .issue-note {
+    margin: 0;
+    padding-left: 1rem;
+    color: var(--ink-soft);
+    border-left: 4px solid var(--accent);
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .issue-note span {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--ink);
+    font: 900 0.64rem/1 var(--sans);
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .project-ledger {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .project-card {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr) minmax(14rem, 0.35fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    padding: clamp(2.5rem, 6vw, 5rem) 0;
+  }
+
+  .project-number {
+    writing-mode: vertical-rl;
+  }
+
+  .project-copy h2 {
+    max-width: 760px;
+    margin: 0.1em 0 0.35em;
+    font-size: clamp(3rem, 5vw, 5.2rem);
+    letter-spacing: -0.06em;
+    line-height: 0.86;
+  }
+
+  .project-deck {
+    max-width: 800px;
+    font-size: 1.35rem;
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  .project-copy > p:not(.dateline, .project-deck) {
+    max-width: 700px;
+    columns: 2;
+    column-gap: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .project-aside {
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--rule);
+  }
+
+  .project-aside dl {
+    margin: 0;
+  }
+
+  .project-aside dl > div {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #aaa292;
+  }
+
+  .project-aside dt {
+    font: 900 0.6rem/1 var(--sans);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .project-aside dd {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .live-mark {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 1.25rem;
+    color: var(--accent);
+    font: 900 0.62rem/1 var(--sans);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .live-mark span {
+    width: 0.55rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgb(159 43 32 / 12%);
+  }
+
+  .archive-note {
+    max-width: 760px;
+    margin: clamp(3rem, 7vw, 6rem) auto 0;
+    text-align: center;
+  }
+
+  .new-projects {
+    padding-top: clamp(3rem, 7vw, 6rem);
+  }
+
+  .brief-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 4px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .project-brief {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    border-right: 1px solid var(--rule);
+  }
+
+  .project-brief:last-child {
+    border-right: 0;
+  }
+
+  .project-brief .project-number {
+    margin-bottom: 2.5rem;
+    writing-mode: initial;
+  }
+
+  .project-brief h2 {
+    margin: 0.15em 0 0.45em;
+    font-size: clamp(2rem, 3.2vw, 3.1rem);
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+
+  .project-brief > p:not(.project-number, .dateline) {
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .brief-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: auto 0 1rem;
+    padding-top: 1.25rem;
+  }
+
+  .brief-meta span {
+    padding: 0.35rem 0.5rem;
+    color: var(--paper);
+    background: var(--ink);
+    font: 900 0.56rem/1 var(--sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .archive-note blockquote {
+    margin: 0;
+    font-size: clamp(1.7rem, 3.8vw, 3.25rem);
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+
+  .archive-note > p:last-child {
+    margin-top: 1rem;
+    color: var(--accent);
+    font: 900 0.7rem/1 var(--sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 760px) {
+    .projects-intro,
+    .project-card {
+      grid-template-columns: 1fr;
+    }
+
+    .projects-header h1 {
+      font-size: clamp(3.7rem, 17vw, 5.8rem);
+    }
+
+    .projects-intro {
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      gap: 1.25rem;
+    }
+
+    .project-number {
+      writing-mode: initial;
+    }
+
+    .project-aside {
+      padding: 1rem 0 0;
+      border-top: 1px solid var(--rule);
+      border-left: 0;
+    }
+
+    .project-copy > p:not(.dateline, .project-deck) {
+      columns: 1;
+    }
+
+    .brief-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .project-brief,
+    .project-brief:last-child {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .project-brief:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  @media (orientation: portrait) {
+    .projects-intro,
+    .project-card {
+      grid-template-columns: 1fr;
+    }
+
+    .projects-header h1 {
+      max-width: 12ch;
+      font-size: clamp(3.4rem, 10vw, 5.4rem);
+    }
+
+    .projects-intro {
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      gap: 1.25rem;
+    }
+
+    .project-number {
+      writing-mode: initial;
+    }
+
+    .project-aside {
+      padding: 1rem 0 0;
+      border-top: 1px solid var(--rule);
+      border-left: 0;
+    }
+
+    .brief-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .project-brief,
+    .project-brief:last-child {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  @media (orientation: landscape) and (max-height: 720px) {
+    .projects-header {
+      padding-bottom: 2.75rem;
+    }
+
+    .projects-header h1 {
+      max-width: 16ch;
+      font-size: clamp(3.25rem, 5vw, 5.25rem);
+    }
+  }
+</style>
